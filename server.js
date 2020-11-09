@@ -1,41 +1,40 @@
-const express = require('express')
-const server = express()
-const session = require('express-session')
+const express = require("express");
+const server = express();
+const session = require('express-session');
 
 const sessionConfig = {
     name: 'notsession',
-    secret: ' Nobody tosses a dwarf',
+    secret: 'nobody tosses a dwarf!',
     cookie: {
         maxAge: 1 * 24 * 60 * 60 * 1000,
-        secure: process.env.NODE_ENV === 'production'? true: false,
+        secure: process.env.NODE_ENV === "production"? true: false,
         httpOnly: true
-    },
+    },  
     resave: false,
     saveUninitialized: false
 }
 
-server.use(session(sessionConfig))
-server.use(express.json())
+server.use(session(sessionConfig));
+server.use(express.json());
 
+server.get("/", (req, res)=>{
+    res.send("the api is working");
+});
 
-server.get('/' (res, res) => {
-    res.send('The API is Working')
-})
+//routing
+const authRoutes = require("./auth/authRouter");
+server.use("/api/", authRoutes);
 
-// Routing
-const authRoutes = require('./auth/authRouter')
-server.use('/api/', authRoutes)
-
-const db = require('./data/db')
+const db = require("./data/db");
 
 server.use(function(req, res, next){
     if(req.path.indexOf('/api/users') !== -1){
-        if(req.session && req.session.user) return next()
-        res.status(401).json({message: 'You Shall Not Pass!'})
-    } else {
-        res.status(401).json({ message: 'You Shall Not Pass!'})
-    }  
-})
+        if(req.session && req.session.user) return next();
+        res.status(401).json({message: "You shall not pass!"});
+    }else {
+        res.status(401).json({message: "You shall not pass!"});
+    };  
+});
 
 server.get("/api/users", (req, res)=>{
     db("users").then(users=>{
